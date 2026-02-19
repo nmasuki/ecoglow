@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import bcrypt from "bcryptjs";
 import * as dotenv from "dotenv";
 import path from "path";
 
@@ -7,6 +8,14 @@ dotenv.config({ path: path.resolve(__dirname, "../.env.local") });
 const MONGODB_URI = process.env.MONGODB_URI!;
 
 // Inline schemas to avoid module resolution issues with ts-node
+const AdminUserSchema = new mongoose.Schema(
+  {
+    username: { type: String, required: true, unique: true },
+    passwordHash: { type: String, required: true },
+  },
+  { timestamps: true }
+);
+
 const CategorySchema = new mongoose.Schema(
   {
     name: { type: String, required: true, unique: true },
@@ -35,6 +44,7 @@ const ProductSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+const AdminUser = mongoose.models.AdminUser || mongoose.model("AdminUser", AdminUserSchema);
 const Category = mongoose.models.Category || mongoose.model("Category", CategorySchema);
 const Product = mongoose.models.Product || mongoose.model("Product", ProductSchema);
 
@@ -116,7 +126,7 @@ const products = [
     howToUse:
       "Apply a small amount on wet hands, lather, then rinse thoroughly.",
     features: ["Removes Dirt & Bacteria", "Refreshing Fragrance", "Gentle Formula"],
-    images: ["/images/products/hand-wash.jpg"],
+    images: ["/images/products/hand-wash.svg"],
     size: "5 Litres",
   },
   {
@@ -250,9 +260,15 @@ async function seed() {
   console.log("Connected.");
 
   // Clear existing data
+  await AdminUser.deleteMany({});
   await Category.deleteMany({});
   await Product.deleteMany({});
   console.log("Cleared existing data.");
+
+  // Create default admin user
+  const passwordHash = await bcrypt.hash("admin123", 12);
+  await AdminUser.create({ username: "admin", passwordHash });
+  console.log("Created admin user (admin / admin123).");
 
   // Insert categories
   const insertedCategories = await Category.insertMany(categories);

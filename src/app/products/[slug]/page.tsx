@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import dbConnect from "@/lib/mongodb";
 import Product from "@/models/Product";
+import "@/models/Category"; // Register schema for populate
 import { WHATSAPP_URL, SITE_NAME } from "@/lib/constants";
 import { IProduct } from "@/types";
 
