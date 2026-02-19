@@ -1,0 +1,15 @@
+Homecare
+1. Dishwash 
+2. Multipurpose 
+
+Silkcare
+3. Handwash 
+4. Bodywash 
+
+Fabricare
+5. Fabric Softener 
+
+Proclean
+6. Toilet cleaner
+7. Disinfectant
+8. Bleach

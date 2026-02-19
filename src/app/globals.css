@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-brand-dark-green: #1B5E20;
+  --color-brand-green: #2E7D32;
+  --color-brand-leaf: #4CAF50;
+  --color-brand-teal: #00897B;
+  --color-brand-teal-light: #26A69A;
+
+  --color-category-homecare: #7CB342;
+  --color-category-silkcare: #0288D1;
+  --color-category-fabricare: #FF7043;
+  --color-category-proclean: #5C6BC0;
+
+  --color-background: #ffffff;
+  --color-foreground: #1a1a1a;
+  --color-muted: #6b7280;
+  --color-border: #e5e7eb;
+
+  --font-sans: var(--font-inter);
+  --font-heading: var(--font-poppins);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading), system-ui, sans-serif;
+}
+
+@keyframes pulse-whatsapp {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.5); }
+  50% { transform: scale(1.05); box-shadow: 0 0 0 12px rgba(37, 211, 102, 0); }
+}
