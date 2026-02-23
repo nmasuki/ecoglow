@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import Product from "@/models/Product";
+import { requireAdmin } from "@/lib/auth";
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    await requireAdmin(request);
     const { id } = await params;
     await dbConnect();
     const product = await Product.findById(id).populate("category").lean();
@@ -19,7 +21,10 @@ export async function GET(
     }
 
     return NextResponse.json(product);
-  } catch {
+  } catch (err) {
+    if (err instanceof Error && err.message === "Unauthorized") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     return NextResponse.json(
       { error: "Failed to fetch product." },
       { status: 500 }
@@ -32,6 +37,7 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    await requireAdmin(request);
     const { id } = await params;
     const body = await request.json();
     await dbConnect();
@@ -50,6 +56,9 @@ export async function PUT(
 
     return NextResponse.json(product);
   } catch (err) {
+    if (err instanceof Error && err.message === "Unauthorized") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     const message =
       err instanceof Error ? err.message : "Failed to update product.";
     return NextResponse.json({ error: message }, { status: 500 });
@@ -57,10 +66,11 @@ export async function PUT(
 }
 
 export async function DELETE(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    await requireAdmin(request);
     const { id } = await params;
     await dbConnect();
     const product = await Product.findByIdAndDelete(id);
@@ -73,7 +83,10 @@ export async function DELETE(
     }
 
     return NextResponse.json({ success: true });
-  } catch {
+  } catch (err) {
+    if (err instanceof Error && err.message === "Unauthorized") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     return NextResponse.json(
       { error: "Failed to delete product." },
       { status: 500 }

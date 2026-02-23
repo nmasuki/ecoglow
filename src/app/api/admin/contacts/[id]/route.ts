@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import ContactSubmission from "@/models/ContactSubmission";
+import { requireAdmin } from "@/lib/auth";
 
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    await requireAdmin(request);
     const { id } = await params;
     const body = await request.json();
     await dbConnect();
@@ -23,7 +25,10 @@ export async function PUT(
     }
 
     return NextResponse.json(contact);
-  } catch {
+  } catch (err) {
+    if (err instanceof Error && err.message === "Unauthorized") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     return NextResponse.json(
       { error: "Failed to update contact." },
       { status: 500 }
@@ -32,15 +37,19 @@ export async function PUT(
 }
 
 export async function DELETE(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    await requireAdmin(request);
     const { id } = await params;
     await dbConnect();
     await ContactSubmission.findByIdAndDelete(id);
     return NextResponse.json({ success: true });
-  } catch {
+  } catch (err) {
+    if (err instanceof Error && err.message === "Unauthorized") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     return NextResponse.json(
       { error: "Failed to delete contact." },
       { status: 500 }

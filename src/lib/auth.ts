@@ -56,4 +56,14 @@ export function getTokenFromRequest(request: Request): string | null {
   return match ? match[1] : null;
 }
 
+export async function requireAdmin(
+  request: Request
+): Promise<{ userId: string; username: string }> {
+  const token = getTokenFromRequest(request);
+  if (!token) throw new Error("Unauthorized");
+  const admin = await verifyToken(token);
+  if (!admin) throw new Error("Unauthorized");
+  return admin;
+}
+
 export { COOKIE_NAME };

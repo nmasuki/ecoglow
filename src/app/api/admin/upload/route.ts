@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
+import { requireAdmin } from "@/lib/auth";
 
 export async function POST(request: NextRequest) {
   try {
+    await requireAdmin(request);
+
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
 
@@ -33,7 +36,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       url: `/images/products/${safeName}`,
     });
-  } catch {
+  } catch (err) {
+    if (err instanceof Error && err.message === "Unauthorized") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     return NextResponse.json(
       { error: "Failed to upload file." },
       { status: 500 }
