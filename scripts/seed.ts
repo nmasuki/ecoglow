@@ -1,52 +1,12 @@
-import mongoose from "mongoose";
+import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import * as dotenv from "dotenv";
 import path from "path";
 
-dotenv.config({ path: path.resolve(__dirname, "../.env.local") });
+dotenv.config({ path: path.resolve(__dirname, "../.env") });
+dotenv.config({ path: path.resolve(__dirname, "../.env.local"), override: true });
 
-const MONGODB_URI = process.env.MONGODB_URI!;
-
-// Inline schemas to avoid module resolution issues with ts-node
-const AdminUserSchema = new mongoose.Schema(
-  {
-    username: { type: String, required: true, unique: true },
-    passwordHash: { type: String, required: true },
-  },
-  { timestamps: true }
-);
-
-const CategorySchema = new mongoose.Schema(
-  {
-    name: { type: String, required: true, unique: true },
-    slug: { type: String, required: true, unique: true },
-    description: { type: String, required: true },
-    accentColor: { type: String, required: true },
-    order: { type: Number, required: true },
-  },
-  { timestamps: true }
-);
-
-const ProductSchema = new mongoose.Schema(
-  {
-    name: { type: String, required: true },
-    slug: { type: String, required: true, unique: true },
-    brandLine: { type: String, required: true },
-    subtitle: { type: String, default: "" },
-    category: { type: mongoose.Schema.Types.ObjectId, ref: "Category", required: true },
-    purpose: { type: String, required: true },
-    howToUse: { type: String, required: true },
-    features: [{ type: String }],
-    images: [{ type: String }],
-    size: { type: String, default: "5 Litres" },
-    isActive: { type: Boolean, default: true },
-  },
-  { timestamps: true }
-);
-
-const AdminUser = mongoose.models.AdminUser || mongoose.model("AdminUser", AdminUserSchema);
-const Category = mongoose.models.Category || mongoose.model("Category", CategorySchema);
-const Product = mongoose.models.Product || mongoose.model("Product", ProductSchema);
+const prisma = new PrismaClient();
 
 const categories = [
   {
@@ -255,43 +215,46 @@ const products = [
 ];
 
 async function seed() {
-  console.log("Connecting to MongoDB...");
-  await mongoose.connect(MONGODB_URI);
-  console.log("Connected.");
+  console.log("Connecting to MySQL...");
 
-  // Clear existing data
-  await AdminUser.deleteMany({});
-  await Category.deleteMany({});
-  await Product.deleteMany({});
+  // Clear existing data (order matters for FK constraints)
+  await prisma.product.deleteMany({});
+  await prisma.contactSubmission.deleteMany({});
+  await prisma.seoSettings.deleteMany({});
+  await prisma.category.deleteMany({});
+  await prisma.adminUser.deleteMany({});
   console.log("Cleared existing data.");
 
   // Create default admin user
   const passwordHash = await bcrypt.hash("admin123", 12);
-  await AdminUser.create({ username: "admin", passwordHash });
+  await prisma.adminUser.create({ data: { username: "admin", passwordHash } });
   console.log("Created admin user (admin / admin123).");
 
   // Insert categories
-  const insertedCategories = await Category.insertMany(categories);
+  const insertedCategories = await Promise.all(
+    categories.map((cat) => prisma.category.create({ data: cat }))
+  );
   const categoryMap = new Map(
-    insertedCategories.map((c: { slug: string; _id: mongoose.Types.ObjectId }) => [c.slug, c._id])
+    insertedCategories.map((c: { slug: string; id: string }) => [c.slug, c.id])
   );
   console.log(`Inserted ${insertedCategories.length} categories.`);
 
   // Insert products with resolved category refs
   const productsWithRefs = products.map(({ categorySlug, ...rest }) => ({
     ...rest,
-    category: categoryMap.get(categorySlug),
+    categoryId: categoryMap.get(categorySlug)!,
     isActive: true,
   }));
 
-  const insertedProducts = await Product.insertMany(productsWithRefs);
-  console.log(`Inserted ${insertedProducts.length} products.`);
+  await prisma.product.createMany({ data: productsWithRefs });
+  console.log(`Inserted ${productsWithRefs.length} products.`);
 
-  await mongoose.disconnect();
+  await prisma.$disconnect();
   console.log("Done! Database seeded successfully.");
 }
 
-seed().catch((err) => {
+seed().catch(async (err) => {
   console.error("Seed failed:", err);
+  await prisma.$disconnect();
   process.exit(1);
 });

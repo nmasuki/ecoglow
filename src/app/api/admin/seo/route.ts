@@ -1,15 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import dbConnect from "@/lib/mongodb";
-import SeoSettings from "@/models/SeoSettings";
+import prisma from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
   try {
     await requireAdmin(request);
-    await dbConnect();
-    let settings = await SeoSettings.findOne().lean();
+    let settings = await prisma.seoSettings.findFirst();
     if (!settings) {
-      settings = await SeoSettings.create({});
+      settings = await prisma.seoSettings.create({ data: {} });
     }
     return NextResponse.json(settings);
   } catch (err) {
@@ -27,14 +25,15 @@ export async function PUT(request: NextRequest) {
   try {
     await requireAdmin(request);
     const body = await request.json();
-    await dbConnect();
 
-    let settings = await SeoSettings.findOne();
+    let settings = await prisma.seoSettings.findFirst();
     if (!settings) {
-      settings = await SeoSettings.create(body);
+      settings = await prisma.seoSettings.create({ data: body });
     } else {
-      Object.assign(settings, body);
-      await settings.save();
+      settings = await prisma.seoSettings.update({
+        where: { id: settings.id },
+        data: body,
+      });
     }
 
     return NextResponse.json(settings);

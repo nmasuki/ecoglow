@@ -1,10 +1,9 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
-import dbConnect from "@/lib/mongodb";
-import Category from "@/models/Category";
-import Product from "@/models/Product";
+import prisma from "@/lib/prisma";
 import ProductGrid from "@/components/products/ProductGrid";
 import CategoryFilter from "@/components/products/CategoryFilter";
+import { ICategory, IProduct } from "@/types";
 
 export const metadata: Metadata = {
   title: "Products",
@@ -17,23 +16,23 @@ export default async function ProductsPage({
 }: {
   searchParams: Promise<{ category?: string }>;
 }) {
-  await dbConnect();
-
   const { category } = await searchParams;
-  const categories = await Category.find().sort({ order: 1 }).lean();
+  const categories = await prisma.category.findMany({
+    orderBy: { order: "asc" },
+  });
 
-  let query: Record<string, unknown> = { isActive: true };
+  const where: { isActive: boolean; categoryId?: string } = { isActive: true };
   if (category) {
-    const cat = await Category.findOne({ slug: category }).lean();
-    if (cat) {
-      query = { ...query, category: cat._id };
-    }
+    const cat = await prisma.category.findUnique({
+      where: { slug: category },
+    });
+    if (cat) where.categoryId = cat.id;
   }
 
-  const products = await Product.find(query).populate("category").lean();
-
-  const serializedCategories = JSON.parse(JSON.stringify(categories));
-  const serializedProducts = JSON.parse(JSON.stringify(products));
+  const products = await prisma.product.findMany({
+    where,
+    include: { category: true },
+  });
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -47,9 +46,9 @@ export default async function ProductsPage({
         </p>
       </div>
       <Suspense fallback={<div className="h-12" />}>
-        <CategoryFilter categories={serializedCategories} />
+        <CategoryFilter categories={categories as ICategory[]} />
       </Suspense>
-      <ProductGrid products={serializedProducts} />
+      <ProductGrid products={products as unknown as IProduct[]} />
     </div>
   );
 }

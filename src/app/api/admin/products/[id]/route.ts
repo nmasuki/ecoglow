@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import dbConnect from "@/lib/mongodb";
-import Product from "@/models/Product";
+import prisma from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
 
 export async function GET(
@@ -10,8 +9,10 @@ export async function GET(
   try {
     await requireAdmin(request);
     const { id } = await params;
-    await dbConnect();
-    const product = await Product.findById(id).populate("category").lean();
+    const product = await prisma.product.findUnique({
+      where: { id },
+      include: { category: true },
+    });
 
     if (!product) {
       return NextResponse.json(
@@ -40,11 +41,11 @@ export async function PUT(
     await requireAdmin(request);
     const { id } = await params;
     const body = await request.json();
-    await dbConnect();
 
-    const product = await Product.findByIdAndUpdate(id, body, {
-      new: true,
-      runValidators: true,
+    const { category, ...rest } = body;
+    const product = await prisma.product.update({
+      where: { id },
+      data: { ...rest, ...(category ? { categoryId: category } : {}) },
     });
 
     if (!product) {
@@ -72,8 +73,7 @@ export async function DELETE(
   try {
     await requireAdmin(request);
     const { id } = await params;
-    await dbConnect();
-    const product = await Product.findByIdAndDelete(id);
+    const product = await prisma.product.delete({ where: { id } });
 
     if (!product) {
       return NextResponse.json(

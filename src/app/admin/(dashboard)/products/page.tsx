@@ -4,11 +4,11 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 
 interface Product {
-  _id: string;
+  id: string;
   name: string;
   slug: string;
   brandLine: string;
-  category: { _id: string; name: string } | null;
+  category: { id: string; name: string } | null;
   isActive: boolean;
   size: string;
   images: string[];
@@ -88,7 +88,7 @@ export default function AdminProductsPage() {
           <tbody>
             {products.map((product) => (
               <tr
-                key={product._id}
+                key={product.id}
                 className="border-b border-border last:border-0 hover:bg-gray-50"
               >
                 <td className="px-4 py-3">
@@ -119,7 +119,7 @@ export default function AdminProductsPage() {
                 <td className="px-4 py-3">
                   <button
                     onClick={() =>
-                      toggleActive(product._id, product.isActive)
+                      toggleActive(product.id, product.isActive)
                     }
                     className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
                       product.isActive
@@ -132,13 +132,13 @@ export default function AdminProductsPage() {
                 </td>
                 <td className="px-4 py-3 text-right">
                   <Link
-                    href={`/admin/products/${product._id}/edit`}
+                    href={`/admin/products/${product.id}/edit`}
                     className="text-brand-teal hover:underline mr-3"
                   >
                     Edit
                   </Link>
                   <button
-                    onClick={() => deleteProduct(product._id, product.name)}
+                    onClick={() => deleteProduct(product.id, product.name)}
                     className="text-red-500 hover:underline"
                   >
                     Delete

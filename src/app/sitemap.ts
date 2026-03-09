@@ -1,15 +1,16 @@
 import type { MetadataRoute } from "next";
-import dbConnect from "@/lib/mongodb";
-import Product from "@/models/Product";
-import Category from "@/models/Category";
+import prisma from "@/lib/prisma";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
-  await dbConnect();
-
-  const products = await Product.find({ isActive: true }).select("slug updatedAt").lean();
-  const categories = await Category.find().select("slug updatedAt").lean();
+  const products = await prisma.product.findMany({
+    where: { isActive: true },
+    select: { slug: true, updatedAt: true },
+  });
+  const categories = await prisma.category.findMany({
+    select: { slug: true, updatedAt: true },
+  });
 
   const productUrls = products.map((p) => ({
     url: `${baseUrl}/products/${p.slug}`,

@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import dbConnect from "@/lib/mongodb";
-import Category from "@/models/Category";
+import prisma from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
   try {
     await requireAdmin(request);
-    await dbConnect();
-    const categories = await Category.find().sort({ order: 1 }).lean();
+    const categories = await prisma.category.findMany({
+      orderBy: { order: "asc" },
+    });
     return NextResponse.json(categories);
   } catch (err) {
     if (err instanceof Error && err.message === "Unauthorized") {
@@ -24,12 +24,11 @@ export async function PUT(request: NextRequest) {
   try {
     await requireAdmin(request);
     const body = await request.json();
-    const { _id, ...update } = body;
-    await dbConnect();
+    const { id, ...update } = body;
 
-    const category = await Category.findByIdAndUpdate(_id, update, {
-      new: true,
-      runValidators: true,
+    const category = await prisma.category.update({
+      where: { id },
+      data: update,
     });
 
     if (!category) {

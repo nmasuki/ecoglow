@@ -1,15 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import dbConnect from "@/lib/mongodb";
-import ContactSubmission from "@/models/ContactSubmission";
+import prisma from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
   try {
     await requireAdmin(request);
-    await dbConnect();
-    const contacts = await ContactSubmission.find()
-      .sort({ createdAt: -1 })
-      .lean();
+    const contacts = await prisma.contactSubmission.findMany({
+      orderBy: { createdAt: "desc" },
+    });
     return NextResponse.json(contacts);
   } catch (err) {
     if (err instanceof Error && err.message === "Unauthorized") {

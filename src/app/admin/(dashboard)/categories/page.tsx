@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 
 interface Category {
-  _id: string;
+  id: string;
   name: string;
   slug: string;
   description: string;
@@ -30,7 +30,7 @@ export default function AdminCategoriesPage() {
   }, []);
 
   const startEdit = (cat: Category) => {
-    setEditing(cat._id);
+    setEditing(cat.id);
     setEditData({
       name: cat.name,
       description: cat.description,
@@ -49,7 +49,7 @@ export default function AdminCategoriesPage() {
     await fetch("/api/admin/categories", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ _id: id, ...editData }),
+      body: JSON.stringify({ id: id, ...editData }),
     });
     setSaving(false);
     setEditing(null);
@@ -92,10 +92,10 @@ export default function AdminCategoriesPage() {
           <tbody>
             {categories.map((cat) => (
               <tr
-                key={cat._id}
+                key={cat.id}
                 className="border-b border-border last:border-0 hover:bg-gray-50"
               >
-                {editing === cat._id ? (
+                {editing === cat.id ? (
                   <>
                     <td className="px-4 py-3">
                       <input
@@ -146,7 +146,7 @@ export default function AdminCategoriesPage() {
                     </td>
                     <td className="px-4 py-3 text-right space-x-2">
                       <button
-                        onClick={() => saveEdit(cat._id)}
+                        onClick={() => saveEdit(cat.id)}
                         disabled={saving}
                         className="text-brand-teal hover:underline"
                       >

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import dbConnect from "@/lib/mongodb";
-import ContactSubmission from "@/models/ContactSubmission";
+import prisma from "@/lib/prisma";
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,13 +22,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    await dbConnect();
-    await ContactSubmission.create({
-      name: name.trim(),
-      email: email.trim().toLowerCase(),
-      phone: (body.phone || "").trim(),
-      subject: subject.trim(),
-      message: message.trim(),
+    await prisma.contactSubmission.create({
+      data: {
+        name: name.trim(),
+        email: email.trim().toLowerCase(),
+        phone: (body.phone || "").trim(),
+        subject: subject.trim(),
+        message: message.trim(),
+      },
     });
 
     return NextResponse.json(

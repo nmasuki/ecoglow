@@ -1,0 +1,72 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+
+model Product {
+  id         String   @id @default(cuid())
+  name       String
+  slug       String   @unique
+  brandLine  String
+  subtitle   String   @default("")
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+  purpose    String   @db.Text
+  howToUse   String   @db.Text
+  features   Json     @default("[]")
+  images     Json     @default("[]")
+  size       String   @default("5 Litres")
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([categoryId])
+}
+
+model Category {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  slug        String    @unique
+  description String    @db.Text
+  accentColor String
+  order       Int
+  products    Product[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model ContactSubmission {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String   @default("")
+  subject   String
+  message   String   @db.Text
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model SeoSettings {
+  id              String   @id @default(cuid())
+  siteTitle       String   @default("EcoGlow Soap Solutions")
+  siteDescription String   @default("EcoGlow Soap Solutions is a leading manufacturer of high-quality, eco-friendly cleaning and hygiene products in Kenya.") @db.VarChar(500)
+  ogImage         String   @default("")
+  metaKeywords    String   @default("")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}

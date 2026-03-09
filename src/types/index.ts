@@ -1,5 +1,5 @@
 export interface ICategory {
-  _id: string;
+  id: string;
   name: string;
   slug: string;
   description: string;
@@ -8,11 +8,12 @@ export interface ICategory {
 }
 
 export interface IProduct {
-  _id: string;
+  id: string;
   name: string;
   slug: string;
   brandLine: string;
   subtitle: string;
+  categoryId: string;
   category: ICategory;
   purpose: string;
   howToUse: string;
@@ -23,7 +24,7 @@ export interface IProduct {
 }
 
 export interface IContactSubmission {
-  _id: string;
+  id: string;
   name: string;
   email: string;
   phone: string;

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import dbConnect from "@/lib/mongodb";
-import AdminUser from "@/models/AdminUser";
+import prisma from "@/lib/prisma";
 import { comparePassword, signToken, COOKIE_NAME } from "@/lib/auth";
 
 export async function POST(request: NextRequest) {
@@ -14,8 +13,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    await dbConnect();
-    const admin = await AdminUser.findOne({ username });
+    const admin = await prisma.adminUser.findUnique({ where: { username } });
 
     if (!admin || !(await comparePassword(password, admin.passwordHash))) {
       return NextResponse.json(
@@ -25,7 +23,7 @@ export async function POST(request: NextRequest) {
     }
 
     const token = await signToken({
-      userId: admin._id.toString(),
+      userId: admin.id,
       username: admin.username,
     });
 

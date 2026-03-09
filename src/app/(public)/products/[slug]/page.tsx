@@ -2,9 +2,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import dbConnect from "@/lib/mongodb";
-import Product from "@/models/Product";
-import "@/models/Category"; // Register schema for populate
+import prisma from "@/lib/prisma";
 import { WHATSAPP_URL, SITE_NAME } from "@/lib/constants";
 import { IProduct } from "@/types";
 
@@ -13,11 +11,11 @@ export async function generateMetadata({
 }: {
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
-  await dbConnect();
   const { slug } = await params;
-  const product = await Product.findOne({ slug, isActive: true })
-    .populate("category")
-    .lean();
+  const product = await prisma.product.findFirst({
+    where: { slug, isActive: true },
+    include: { category: true },
+  });
 
   if (!product) return { title: "Product Not Found" };
 
@@ -38,15 +36,15 @@ export default async function ProductDetailPage({
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  await dbConnect();
   const { slug } = await params;
-  const product = await Product.findOne({ slug, isActive: true })
-    .populate("category")
-    .lean();
+  const product = await prisma.product.findFirst({
+    where: { slug, isActive: true },
+    include: { category: true },
+  });
 
   if (!product) notFound();
 
-  const p = JSON.parse(JSON.stringify(product)) as IProduct;
+  const p = product as unknown as IProduct;
   const whatsappMsg = encodeURIComponent(
     `Hello EcoGlow! I'd like to order ${p.name}${p.subtitle ? ` (${p.subtitle})` : ""}. Please share pricing and availability.`
   );

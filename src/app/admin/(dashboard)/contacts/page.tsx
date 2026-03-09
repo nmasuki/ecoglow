@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 
 interface Contact {
-  _id: string;
+  id: string;
   name: string;
   email: string;
   phone: string;
@@ -41,7 +41,7 @@ export default function AdminContactsPage() {
   const deleteContact = async (id: string) => {
     if (!confirm("Delete this message?")) return;
     await fetch(`/api/admin/contacts/${id}`, { method: "DELETE" });
-    if (selected?._id === id) setSelected(null);
+    if (selected?.id === id) setSelected(null);
     fetchContacts();
   };
 
@@ -90,13 +90,13 @@ export default function AdminContactsPage() {
             <tbody>
               {contacts.map((c) => (
                 <tr
-                  key={c._id}
+                  key={c.id}
                   onClick={() => {
                     setSelected(c);
-                    if (!c.isRead) markRead(c._id);
+                    if (!c.isRead) markRead(c.id);
                   }}
                   className={`border-b border-border last:border-0 cursor-pointer transition-colors ${
-                    selected?._id === c._id
+                    selected?.id === c.id
                       ? "bg-brand-teal/5"
                       : "hover:bg-gray-50"
                   } ${!c.isRead ? "font-semibold" : ""}`}
@@ -119,7 +119,7 @@ export default function AdminContactsPage() {
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        deleteContact(c._id);
+                        deleteContact(c.id);
                       }}
                       className="text-red-500 hover:underline text-xs"
                     >

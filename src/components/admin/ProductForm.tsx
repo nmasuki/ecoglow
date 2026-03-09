@@ -4,7 +4,7 @@ import { useEffect, useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 
 interface Category {
-  _id: string;
+  id: string;
   name: string;
 }
 
@@ -13,7 +13,7 @@ interface ProductData {
   slug: string;
   brandLine: string;
   subtitle: string;
-  category: string;
+  categoryId: string;
   purpose: string;
   howToUse: string;
   features: string[];
@@ -27,7 +27,7 @@ const emptyProduct: ProductData = {
   slug: "",
   brandLine: "",
   subtitle: "",
-  category: "",
+  categoryId: "",
   purpose: "",
   howToUse: "",
   features: [],
@@ -63,7 +63,7 @@ export default function ProductForm({
             slug: data.slug || "",
             brandLine: data.brandLine || "",
             subtitle: data.subtitle || "",
-            category: data.category?._id || data.category || "",
+            categoryId: data.categoryId || "",
             purpose: data.purpose || "",
             howToUse: data.howToUse || "",
             features: data.features || [],
@@ -228,15 +228,15 @@ export default function ProductForm({
           <div>
             <label className="block text-sm font-medium mb-1">Category</label>
             <select
-              name="category"
-              value={product.category}
+              name="categoryId"
+              value={product.categoryId}
               onChange={handleChange}
               required
               className="w-full px-3 py-2 rounded-lg border border-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal outline-none text-sm"
             >
               <option value="">Select category</option>
               {categories.map((cat) => (
-                <option key={cat._id} value={cat._id}>
+                <option key={cat.id} value={cat.id}>
                   {cat.name}
                 </option>
               ))}

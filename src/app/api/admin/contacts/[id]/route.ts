@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import dbConnect from "@/lib/mongodb";
-import ContactSubmission from "@/models/ContactSubmission";
+import prisma from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
 
 export async function PUT(
@@ -11,10 +10,10 @@ export async function PUT(
     await requireAdmin(request);
     const { id } = await params;
     const body = await request.json();
-    await dbConnect();
 
-    const contact = await ContactSubmission.findByIdAndUpdate(id, body, {
-      new: true,
+    const contact = await prisma.contactSubmission.update({
+      where: { id },
+      data: body,
     });
 
     if (!contact) {
@@ -43,8 +42,7 @@ export async function DELETE(
   try {
     await requireAdmin(request);
     const { id } = await params;
-    await dbConnect();
-    await ContactSubmission.findByIdAndDelete(id);
+    await prisma.contactSubmission.delete({ where: { id } });
     return NextResponse.json({ success: true });
   } catch (err) {
     if (err instanceof Error && err.message === "Unauthorized") {

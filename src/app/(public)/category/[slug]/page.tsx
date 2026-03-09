@@ -1,11 +1,9 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
-import dbConnect from "@/lib/mongodb";
-import Category from "@/models/Category";
-import Product from "@/models/Product";
+import prisma from "@/lib/prisma";
 import ProductGrid from "@/components/products/ProductGrid";
-import { ICategory } from "@/types";
+import { ICategory, IProduct } from "@/types";
 import { SITE_NAME } from "@/lib/constants";
 
 export async function generateMetadata({
@@ -13,13 +11,12 @@ export async function generateMetadata({
 }: {
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
-  await dbConnect();
   const { slug } = await params;
-  const category = await Category.findOne({ slug }).lean();
+  const category = await prisma.category.findUnique({ where: { slug } });
 
   if (!category) return { title: "Category Not Found" };
 
-  const cat = category as unknown as ICategory;
+  const cat = category as ICategory;
   return {
     title: cat.name,
     description: cat.description,
@@ -35,21 +32,16 @@ export default async function CategoryPage({
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  await dbConnect();
   const { slug } = await params;
-  const category = await Category.findOne({ slug }).lean();
+  const category = await prisma.category.findUnique({ where: { slug } });
 
   if (!category) notFound();
 
-  const cat = JSON.parse(JSON.stringify(category)) as ICategory;
-  const products = await Product.find({
-    category: category._id,
-    isActive: true,
-  })
-    .populate("category")
-    .lean();
-
-  const serializedProducts = JSON.parse(JSON.stringify(products));
+  const cat = category as ICategory;
+  const products = await prisma.product.findMany({
+    where: { categoryId: category.id, isActive: true },
+    include: { category: true },
+  });
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -76,7 +68,7 @@ export default async function CategoryPage({
         </div>
       </div>
 
-      <ProductGrid products={serializedProducts} />
+      <ProductGrid products={products as unknown as IProduct[]} />
     </div>
   );
 }

@@ -1,17 +1,12 @@
-import dbConnect from "@/lib/mongodb";
-import Product from "@/models/Product";
-import Category from "@/models/Category";
-import ContactSubmission from "@/models/ContactSubmission";
+import prisma from "@/lib/prisma";
 
 export default async function AdminDashboard() {
-  await dbConnect();
-
   const [productCount, categoryCount, unreadCount, totalContacts] =
     await Promise.all([
-      Product.countDocuments(),
-      Category.countDocuments(),
-      ContactSubmission.countDocuments({ isRead: false }),
-      ContactSubmission.countDocuments(),
+      prisma.product.count(),
+      prisma.category.count(),
+      prisma.contactSubmission.count({ where: { isRead: false } }),
+      prisma.contactSubmission.count(),
     ]);
 
   const stats = [
