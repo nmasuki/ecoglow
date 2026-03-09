@@ -27,6 +27,8 @@
 *.pem
 Thumbs.db
 Desktop.ini
+*.zip
+*.tar.gz
 
 # debug
 npm-debug.log*
