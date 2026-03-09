@@ -1,5 +1,4 @@
-import Link from "next/link";
-import Image from "next/image";
+import { Link } from "react-router-dom";
 import { IProduct } from "@/types";
 import { WHATSAPP_URL } from "@/lib/constants";
 
@@ -11,29 +10,19 @@ export default function ProductCard({ product }: { product: IProduct }) {
 
   return (
     <div className="group bg-white rounded-xl border border-border overflow-hidden hover:shadow-lg transition-all duration-200">
-      <Link href={`/products/${product.slug}`} className="block">
+      <Link to={`/products/${product.slug}`} className="block">
         <div className="relative aspect-[4/3] bg-gray-50 overflow-hidden">
           {hasImage ? (
-            <Image
+            <img
               src={product.images[0]}
               alt={product.name}
-              fill
-              className="object-cover group-hover:scale-105 transition-transform duration-300"
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              loading="lazy"
             />
           ) : (
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-brand-teal/10 to-brand-leaf/10">
-              <svg
-                width={48}
-                height={48}
-                viewBox="0 0 100 120"
-                fill="none"
-                className="opacity-30 mb-2"
-              >
-                <path
-                  d="M50 8 C50 8, 15 55, 15 72 C15 92, 30 108, 50 108 C70 108, 85 92, 85 72 C85 55, 50 8, 50 8Z"
-                  fill="#00897B"
-                />
+              <svg width={48} height={48} viewBox="0 0 100 120" fill="none" className="opacity-30 mb-2">
+                <path d="M50 8 C50 8, 15 55, 15 72 C15 92, 30 108, 50 108 C70 108, 85 92, 85 72 C85 55, 50 8, 50 8Z" fill="#00897B" />
               </svg>
               <span className="text-sm text-muted">Image coming soon</span>
             </div>
@@ -49,8 +38,8 @@ export default function ProductCard({ product }: { product: IProduct }) {
         </div>
       </Link>
       <div className="p-4">
-        <Link href={`/products/${product.slug}`}>
-          <h3 className="font-bold text-brand-dark-green font-[family-name:var(--font-heading)] mb-1 group-hover:text-brand-teal transition-colors">
+        <Link to={`/products/${product.slug}`}>
+          <h3 className="font-bold text-brand-dark-green font-heading mb-1 group-hover:text-brand-teal transition-colors">
             {product.name}
           </h3>
           {product.subtitle && (
@@ -62,7 +51,7 @@ export default function ProductCard({ product }: { product: IProduct }) {
         </Link>
         <div className="flex gap-2">
           <Link
-            href={`/products/${product.slug}`}
+            to={`/products/${product.slug}`}
             className="flex-1 text-center px-3 py-2 text-sm font-medium text-brand-teal border border-brand-teal rounded-lg hover:bg-brand-teal hover:text-white transition-colors"
           >
             View Details

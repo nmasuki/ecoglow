@@ -18,6 +18,7 @@
 /out/
 
 # production
+/deploy-package
 /build
 /dist
 

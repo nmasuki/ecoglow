@@ -1,6 +1,4 @@
-"use client";
-
-import { useRouter, useSearchParams } from "next/navigation";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { ICategory } from "@/types";
 
 export default function CategoryFilter({
@@ -8,15 +6,15 @@ export default function CategoryFilter({
 }: {
   categories: ICategory[];
 }) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const activeCategory = searchParams.get("category") || "all";
 
   const handleFilter = (slug: string) => {
     if (slug === "all") {
-      router.push("/products");
+      navigate("/products");
     } else {
-      router.push(`/products?category=${slug}`);
+      navigate(`/products?category=${slug}`);
     }
   };
 

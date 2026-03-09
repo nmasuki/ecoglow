@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "react-router-dom";
 
 export default function Logo({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
   const dimensions = {
@@ -10,7 +10,7 @@ export default function Logo({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
   const { svg, text } = dimensions[size];
 
   return (
-    <Link href="/" className="flex items-center gap-2 group">
+    <Link to="/" className="flex items-center gap-2 group">
       <svg
         width={svg}
         height={svg}
@@ -41,7 +41,7 @@ export default function Logo({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
       </svg>
       <div className="flex flex-col leading-none">
         <span
-          className={`${text} font-bold text-brand-dark-green font-[family-name:var(--font-heading)] tracking-tight`}
+          className={`${text} font-bold text-brand-dark-green font-heading tracking-tight`}
         >
           EcoGlow
         </span>

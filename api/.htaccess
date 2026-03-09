@@ -1,0 +1,24 @@
+RewriteEngine On
+
+# Handle API routes
+# /api/products/slug -> products.php?slug=slug
+# /api/admin/products/id -> admin/products.php?id=id
+# /api/admin/auth/check -> admin/auth-check.php
+# /api/admin/contacts/id -> admin/contacts.php?id=id
+
+RewriteRule ^admin/auth/check$ admin/auth-check.php [L,QSA]
+RewriteRule ^admin/products/([^/]+)$ admin/products.php?id=$1 [L,QSA]
+RewriteRule ^admin/products$ admin/products.php [L,QSA]
+RewriteRule ^admin/categories$ admin/categories.php [L,QSA]
+RewriteRule ^admin/contacts/([^/]+)$ admin/contacts.php?id=$1 [L,QSA]
+RewriteRule ^admin/contacts$ admin/contacts.php [L,QSA]
+RewriteRule ^admin/seo$ admin/seo.php [L,QSA]
+RewriteRule ^admin/upload$ admin/upload.php [L,QSA]
+RewriteRule ^admin/stats$ admin/stats.php [L,QSA]
+RewriteRule ^admin/auth$ admin/auth.php [L,QSA]
+
+RewriteRule ^products/([a-z0-9-]+)$ products.php?slug=$1 [L,QSA]
+RewriteRule ^products$ products.php [L,QSA]
+RewriteRule ^categories/([a-z0-9-]+)$ categories.php?slug=$1 [L,QSA]
+RewriteRule ^categories$ categories.php [L,QSA]
+RewriteRule ^contact$ contact.php [L,QSA]
